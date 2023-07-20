@@ -13,12 +13,17 @@ return new class extends Migration
     {
         Schema::create('classrooms', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+
             $table->string('name');
-            $table->string('subject')->nullable();
             $table->string('section')->nullable();
+            $table->string('subject')->nullable();
             $table->string('room')->nullable();
             $table->string('code')->unique();
             $table->string('image')->nullable();
+            $table->string('theme')->nullable();
+            $table->enum('status', ['active', 'archived'])->default('active');
+
             $table->timestamps();
         });
     }

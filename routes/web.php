@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::view('/download', 'download');
+
+Route::get('/tt/{name}/{d?}', function ($name, $default = null){
+    dd(\route('classrooms.show', ['a' => 1,2,3], false));
+    dd($name, $default);
+})->where('name', '.+')->where('d', 'yes|no');
 Route::get('/', function () {
     return view('welcome');
 });
