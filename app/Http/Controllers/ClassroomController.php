@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ClassroomRequest;
 use App\Models\Classroom;
+use App\Models\Scopes\UserClassroomScope;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -15,9 +18,41 @@ use Illuminate\View\View;
 
 class ClassroomController extends Controller
 {
-    public function index(): Renderable|View
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    public function download()
     {
 
+        $path = request()->query('linkFile');
+
+       if($path && Storage::disk('uploads')->exists($path)){
+//          $file =  public_path('uploads/'. $path);
+//          dd($file);
+//           $file = Storage::disk('uploads')->path($path);
+           $file = Storage::disk('uploads')->get($path);
+           return response()->download(file: $file);
+       }
+
+       //flash message
+
+        //redirect
+
+    }
+    public function index(): Renderable|View
+    {
+//        dd(\DB::table('classrooms')->whereNotNull('deleted_at')->orderBy('created_at', 'desc')->get());
+//        dd(Classroom::latest()->dd());
+
+        //ui
+        //breeze
+        //fortify => only backend
+        //stream => use veu and liveware
+
+//        (Auth::logout());
+//        dd(auth()->user());
 //session()->regenerate(true);
 //dd(session()->getId(), auth()->user(), session()->all());
         //        session()->put('success', 'value');
@@ -26,9 +61,12 @@ class ClassroomController extends Controller
 //        dd(session()->all());
 //        session()->reflash();
 //        return redirect()->to('/classrooms/1');
-        $classrooms = Classroom::all();
-
-
+        $classrooms = Classroom::status()->latest()->recent()
+//            ->withGlobalScopes()
+//            ->withoutGlobalScope('user')
+                ->withoutGlobalScope(UserClassroomScope::class)
+            ->dd();
+dd($classrooms);
         //return response: view, redirect, json, file, string
 
 //        return Redirect::to('/users');
@@ -48,6 +86,7 @@ class ClassroomController extends Controller
 
     public function show(Classroom $classroom)
     {
+//        Classroom::withTrashed()->findOrFail($id);
 //        dd(session()->all());
         return $classroom;
     }
@@ -99,6 +138,7 @@ class ClassroomController extends Controller
         //mass assigment
 //        $request->merge(['code' => Str::random(8)]);
         $validated['code'] = Str::random(8);
+        $validated['user_id'] = Auth::id(); //Auth::user()->id
 //        Classroom::query()->create($request->all());
 
 //        $classroom = new Classroom($request->all());
@@ -166,10 +206,36 @@ class ClassroomController extends Controller
 //        Classroom::destroy($id);
 
         $item = Classroom::query()->find($id);
-        Classroom::deleteImage($item->image);
+//        Classroom::deleteImage($item->image);
 
         $item->delete();
 
         return redirect()->back()->with('success', 'Classroom deleted successfully.');
+    }
+
+    public function trashed()
+    {
+       $classrooms = Classroom::onlyTrashed()->latest('deleted_at')->get();
+
+       return view('classrooms.trashed', compact('classrooms'));
+    }
+
+    public function restore($id)
+    {
+        $classroom = Classroom::onlyTrashed()->findOrFail($id);
+        $classroom->restore();
+
+        return redirect()->route('classrooms.index')->with('success', "Classroom ({$classroom->name}) restored.");
+    }
+
+    public function forceDeleted($id)
+    {
+        $classroom = Classroom::onlyTrashed()->findOrFail($id);
+        $classroom->forceDelete();
+
+        Classroom::deleteImage($classroom->image);
+
+        return \redirect()->back()->with('success', "Classroom {$classroom->name} force deleted." );
+
     }
 }

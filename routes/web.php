@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,28 +14,49 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::view('/download', 'download');
-
-Route::get('/tt/{name}/{d?}', function ($name, $default = null){
-    dd(\route('classrooms.show', ['a' => 1,2,3], false));
-    dd($name, $default);
-})->where('name', '.+')->where('d', 'yes|no');
 Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-//dd('tete');
-//Route::get('/classrooms', [\App\Http\Controllers\Classroom::class, 'index']);
-//Route::get('/classrooms/create', [\App\Http\Controllers\Classroom::class, 'create']);
-//Route::get('/classrooms/{classroom:code}', [\App\Http\Controllers\Classroom::class, 'show'])
-//->where('classroom', '\d+');
-//Route::post('/classrooms', [\App\Http\Controllers\Classroom::class, 'store']);
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
-Route::resource('/classrooms', \App\Http\Controllers\ClassroomController::class)
-->parameters(['{classroom}' =>'{class}'])
-->name(
-    'index' , 'c.index'
-);
+require __DIR__.'/auth.php';
 
+//Route::group([
+//    'middleware' => ['auth'],
+//    'prefix' => 'tt'
+//], function(){});
+
+
+Route::middleware(['auth'])->prefix('')->group(function(){
+
+    Route::prefix('/classrooms/trashed')
+        ->as('classrooms.')
+        ->controller(\App\Http\Controllers\ClassroomController::class)
+        ->group(function(){
+            Route::get('','trashed')->name('trashed');
+            Route::put('/{classroom}', 'restore')->name('restore');
+            Route::delete('/{classroom}', 'forceDeleted')->name('force-deleted');
+        });
+
+//    Route::resource('/classrooms', \App\Http\Controllers\ClassroomController::class)
+//        ->parameters(['{classroom}' =>'{class}'])
+//        ->name(
+//            'index' , 'c.index'
+//        );
+
+    Route::resources([
+        'topics' => \App\Http\Controllers\TopicController::class,
+        'classrooms' => \App\Http\Controllers\ClassroomController::class
+    ]);
+
+});
 
