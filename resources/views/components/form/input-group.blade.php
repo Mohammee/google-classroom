@@ -1,6 +1,6 @@
 
 <div {{ $attributes->class(['mb-3']) }}>
-    {{ $label }}
+    {{ $label  ?? ''}}
    {{ $slot }}
     <x-form.error :name="$name"/>
 </div>

@@ -22,6 +22,7 @@ class ClassroomRequest extends FormRequest
      */
     public function rules(): array
     {
+        $id = $this->route('classroom', 0);
 
 //        dd($this->route('classroom'));
         return  [
@@ -36,7 +37,7 @@ class ClassroomRequest extends FormRequest
             ],
             'section' => 'nullable|string|max:255',
             'subject' => 'nullable|string|max:255',
-            'room' => 'nullable|string|max:255',
+            'room' => 'nullable|string|max:255|unique:classrooms,room,'. $id,
             'image' => [
                 'nullable',
                 'image',

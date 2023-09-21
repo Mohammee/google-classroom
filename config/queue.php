@@ -36,6 +36,7 @@ return [
 
         'database' => [
             'driver' => 'database',
+            //if change table name put here new name
             'table' => 'jobs',
             'queue' => 'default',
             'retry_after' => 90,
@@ -83,6 +84,9 @@ return [
     | connection and table which has been defined by your application.
     |
     */
+
+    //used for batch alot of queue so if has 3 queue you must use batch to ensure that 3 queue
+    //work one by one if not use bach sometimes work at the same time and this make error for my logic
 
     'batching' => [
         'database' => env('DB_CONNECTION', 'mysql'),

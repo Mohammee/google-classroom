@@ -6,11 +6,14 @@ use App\Http\Requests\ClassroomRequest;
 use App\Models\Classroom;
 use App\Models\Scopes\UserClassroomScope;
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -21,6 +24,7 @@ class ClassroomController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+//        $this->authorizeResource(Classroom::class);
     }
 
     public function download()
@@ -43,6 +47,7 @@ class ClassroomController extends Controller
     }
     public function index(): Renderable|View
     {
+//        $this->authorize('view-any', Classroom::class);
 //        dd(\DB::table('classrooms')->whereNotNull('deleted_at')->orderBy('created_at', 'desc')->get());
 //        dd(Classroom::latest()->dd());
 
@@ -64,9 +69,9 @@ class ClassroomController extends Controller
         $classrooms = Classroom::status()->latest()->recent()
 //            ->withGlobalScopes()
 //            ->withoutGlobalScope('user')
-                ->withoutGlobalScope(UserClassroomScope::class)
-            ->dd();
-dd($classrooms);
+//                ->withoutGlobalScope(UserClassroomScope::class)
+            ->get();
+//dd($classrooms);
         //return response: view, redirect, json, file, string
 
 //        return Redirect::to('/users');
@@ -88,7 +93,9 @@ dd($classrooms);
     {
 //        Classroom::withTrashed()->findOrFail($id);
 //        dd(session()->all());
-        return $classroom;
+
+        $invitation_link = (URL::temporarySignedRoute('classrooms.join', now()->addMinute(), ['classroom' => $classroom->id, 'code' => $classroom->code]));
+        return view('classrooms.show', compact('classroom', 'invitation_link'));
     }
 
     public function store(Request $request)
@@ -137,15 +144,31 @@ dd($classrooms);
 
         //mass assigment
 //        $request->merge(['code' => Str::random(8)]);
-        $validated['code'] = Str::random(8);
-        $validated['user_id'] = Auth::id(); //Auth::user()->id
+        //form creating listener
+//        $validated['code'] = Str::random(8);
+//        $validated['user_id'] = Auth::id(); //Auth::user()->id
 //        Classroom::query()->create($request->all());
 
 //        $classroom = new Classroom($request->all());
 //        $classroom->save();
 
-        $classroom = new Classroom();
-        $classroom->fill($validated)->save();
+        try {
+            DB::beginTransaction();
+
+//            DB::transaction();
+
+            $classroom = new Classroom();
+            $classroom->fill($validated)->save();
+
+            $classroom->join(Auth()->id(), 'teacher');
+
+            DB::commit();
+        }catch(QueryException $e){
+            DB::rollBack();
+
+            return back()->with('error', $e->getMessage())->withInput();
+        }
+
 
         //Flash Message
         session()->flash('success', 'Item create successfully.');
@@ -233,9 +256,17 @@ dd($classrooms);
         $classroom = Classroom::onlyTrashed()->findOrFail($id);
         $classroom->forceDelete();
 
-        Classroom::deleteImage($classroom->image);
+        //form event forceDeleted
+//        Classroom::deleteImage($classroom->image);
 
         return \redirect()->back()->with('success', "Classroom {$classroom->name} force deleted." );
 
+    }
+
+    public function chat(Classroom $classroom)
+    {
+        return view('classrooms.chat', [
+            'classroom' => $classroom,
+        ]);
     }
 }

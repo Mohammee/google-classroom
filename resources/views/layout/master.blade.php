@@ -31,7 +31,13 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
 
+
+<script>
+    const userId = '{{ Auth::id() }}'
+</script>
 @stack('extra-js')
+
+@vite(['resources/js/app.js'])
 
 </body>
 </html>

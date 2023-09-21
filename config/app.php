@@ -96,6 +96,8 @@ return [
     |
     */
 
+    //fallback on used with short key (auth.key) not used with json files
+
     'fallback_locale' => 'en',
 
     /*
@@ -165,7 +167,8 @@ return [
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
+         App\Providers\FortifyServiceProvider::class,
+         App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
     ])->toArray(),
@@ -183,6 +186,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        'Model' => \Illuminate\Database\Eloquent\Model::class
     ])->toArray(),
 
 ];

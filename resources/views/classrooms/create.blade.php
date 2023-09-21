@@ -1,6 +1,7 @@
 <x-main-layout title="Create Item">
 
   <x-errors />
+    <x-alert name="error" class="alert alert-danger" />
     <form action="{{ url('/classrooms') }}" method="post" class="form" enctype="multipart/form-data">
 
        <!-- <input type="hidden" value="{{ csrf_token() }}">
