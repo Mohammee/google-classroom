@@ -40,12 +40,16 @@
         crossorigin="anonymous"></script>
 
 <script>
-    const userId = '{{ Auth::id() }}'
+    const userId = '{{ Auth::id() }}';
+    const _token = '{{ csrf_token() }}';
 </script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
 
 @stack('extra-js')
 
-@vite(['resources/js/app.js'])
+@vite(['resources/js/app.js', 'resources/js/fcm.js'])
 
 </body>
 </html>

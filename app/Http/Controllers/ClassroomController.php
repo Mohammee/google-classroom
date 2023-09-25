@@ -47,6 +47,7 @@ class ClassroomController extends Controller
     }
     public function index(): Renderable|View
     {
+
 //        $this->authorize('view-any', Classroom::class);
 //        dd(\DB::table('classrooms')->whereNotNull('deleted_at')->orderBy('created_at', 'desc')->get());
 //        dd(Classroom::latest()->dd());

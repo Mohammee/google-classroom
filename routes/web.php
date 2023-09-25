@@ -19,7 +19,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/admin/2fa',[\App\Http\Controllers\Admin\TwoFactorAuthenticationController::class, 'create']);
+
+Route::get('/admin/2fa',[\App\Http\Controllers\Admin\TwoFactorAuthenticationController::class, 'create'])->middleware('auth:admin');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -42,6 +43,11 @@ Route::middleware('auth')->group(function () {
 Route::get('/plans', [\App\Http\Controllers\PlansController::class, 'index'])->name('plans');
 
 Route::middleware(['auth'])->prefix('')->group(function () {
+
+    Route::get('settings/{group}', [\App\Http\Controllers\SettingController::class, 'edit'])
+        ->name('settings');
+    Route::patch('settings/{group}', [\App\Http\Controllers\SettingController::class, 'update']);
+
     Route::prefix('/classrooms/trashed')
         ->as('classrooms.')
         ->controller(\App\Http\Controllers\ClassroomController::class)

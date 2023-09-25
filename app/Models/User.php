@@ -151,6 +151,12 @@ class User extends Authenticatable implements HasLocalePreference
 
     public function routeNotificationForFcm($notification = null)
     {
+        // you can return array of all device token
+        //you can return single token
+//        $tokens = [];
+//        foreach($this->devices as $device){
+//            $tokens['token'] = $device->token;
+//        }
         return $this->devices()->pluck('token')->toArray();
     }
 

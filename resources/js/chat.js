@@ -86,18 +86,36 @@ import "./bootstrap.js";
         })
         .listen('.new-message', function (event) {
             addMessage(event)
-        });
+        })
+        .listenForWhisper('start-typing', (event) => {
+            $('#whisper').html(`${event.name} is typing...`)
+        }).listenForWhisper('stop-typing', (event)=>{
+            $('#whisper').html('')
+    });
 
+    let timer;
+    let typing = false;
     //make checked client event  on pusher app settings
-    // $('#message-form textarea').on('input', function (e) {
-    //     ch.whisper('typing', {
-    //         name: user.name
-    //     });
-    // })
+    $('#message-form textarea').on('keyup', function (e) {
+        if (!typing) {
+            ch.whisper('start-typing', {
+                name: user.name
+            });
+        }
+        typing = true;
+
+        if(timer) clearTimeout(timer)
+
+        timer = setTimeout(() => {
+            ch.whisper('stop-typing', {
+                name: user.name
+            });
+            typing = false;
+        }, 3000);
+
+    })
     //
-    // ch.whisper('stop-typing', {
-    //     name: user.name
-    // });
+
 })(jQuery)
 
 

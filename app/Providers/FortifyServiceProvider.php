@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -32,6 +33,17 @@ class FortifyServiceProvider extends ServiceProvider
                 'fortify.username' => 'username',
             ]);
         }
+
+        $this->app->instance(LoginResponse::class,  new class implements LoginResponse{
+                public function toResponse($request)
+                {
+                    $user = $request->user();
+                    if($user instanceof Admin){
+                        return redirect('admin/2fa');
+                    }
+                    return redirect()->intended(route('classrooms.index'));
+                }
+            });
     }
 
     /**

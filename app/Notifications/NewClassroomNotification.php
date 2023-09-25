@@ -157,6 +157,9 @@ class NewClassroomNotification extends Notification
         ];
     }
 
+    //any device has token so need fcm_token
+    //fcm_token send by client side like(mobile)
+    //when use fcm for broadcase you used fcm api not broadcast in laravel like pusher
     public function toFcm($notifiable)
     {
         $content = __(':name posted a new :type :title', [
@@ -165,13 +168,14 @@ class NewClassroomNotification extends Notification
             'title' => $this->classwork->title
         ]);
         return FcmMessage::create()
+            //send data with message if needed
             ->setData([
-                'classwork_id' => $this->classwork->id,
-                'user_id' => $this->classwork->user_id,
+                'classwork_id' => "{$this->classwork->id}",
+                'user_id' => "{$this->classwork->user_id}",
             ])
             ->setNotification(
                 \NotificationChannels\Fcm\Resources\Notification::create()
-                    ->setTitle('Account Activated')
+                    ->setTitle('New Classwork')
                     ->setBody($content)
                     ->setImage('http://example.com/url-to-image-here.png')
             )

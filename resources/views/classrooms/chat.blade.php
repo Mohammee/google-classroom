@@ -16,6 +16,7 @@
                 <div id="messages" class="border rounded bg-light p-3 mb-3">
 
                 </div>
+                <div id="whisper" class="text-sm fs-5 text-muted"></div>
                 <form class="row g-3 align-items-center" id="message-form">
                     <div class="col-9">
                         <label class="visually-hidden" for="body">Username</label>
@@ -34,7 +35,6 @@
     </div>
 
     @push('extra-js')
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
         <script>
             const messages = {
@@ -44,6 +44,7 @@
 
             const csrf_token = '{{ csrf_token() }}';
             const user = {
+                id: '{{ Auth::id() }}',
                 name: '{{ Auth::user()->name }}'
             }
 

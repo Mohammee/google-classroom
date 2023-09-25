@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\UserAlreadyJoinClassroomException;
 use App\Models\Classroom;
 use App\Models\Scopes\UserClassroomScope;
 use Illuminate\Http\Request;
@@ -17,11 +18,11 @@ class JoinClassroomController extends Controller
 
         $classroom = Classroom::withoutGlobalScope(UserClassroomScope::class)->status('active')->findOrFail($id);
 
-        try {
+//        try {
             $this->exists($classroom, Auth::id());
-        }catch (\Exception){
-            return Redirect::route('classrooms.show', $id)->with('success', 'You are joined in this classroom.');
-        }
+//        }catch (\Exception){
+//            return Redirect::route('classrooms.show', $id)->with('success', 'You are joined in this classroom.');
+//        }
 
         return view('classrooms.join', compact('classroom'));
     }
@@ -32,11 +33,12 @@ class JoinClassroomController extends Controller
 
         $classroom = Classroom::withoutGlobalScope(UserClassroomScope::class)->status('active')->findOrFail($id);
 
-        try {
+        // use laravel exception
+//        try {
             $this->exists($classroom, Auth::id());
-        }catch (\Exception){
-            return Redirect::route('classrooms.show', $id);
-        }
+//        }catch (\Exception){
+//            return Redirect::route('classrooms.show', $id);
+//        }
 
         DB::table('classroom_user')->insert([
             'classroom_id' => $id,
@@ -60,7 +62,10 @@ class JoinClassroomController extends Controller
 //        $exists = $classroom->users()->wherePivot('user_id', '=', $user_id)->exists();
 
         if($exists){
-            throw new \Exception('You are already joined.');
+            $ex = new UserAlreadyJoinClassroomException('You are already joined.');
+            $ex->setClassroomId($classroom->id);
+
+            throw $ex;
         }
     }
 }

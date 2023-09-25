@@ -44,6 +44,7 @@ require __DIR__.'/../vendor/autoload.php';
 |
 */
 
+// throw new Exception('Error !') this error inside php error log
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
 $kernel = $app->make(Kernel::class);

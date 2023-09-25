@@ -279,7 +279,7 @@ class ClassworkController extends Controller
 
     protected function getType()
     {
-        $type = ClassworkType::tryFrom(request()->query('type'));
+        $type = ClassworkType::tryFrom(request()->query('type', ''));
 //        $allowed_types = [
 //            Classwork::TYPE_ASSIGNMENT,
 //            Classwork::TYPE_MATERIAL,

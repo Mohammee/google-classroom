@@ -8,10 +8,18 @@
     <title>Document</title>
 </head>
 <body>
-@if(Auth::guard('admin')->user()->two_factor_secret && Auth::guard('admin')->user()->two_factor_secret)
+@if($user->two_factor_secret && $user->two_factor_confirmed_at)
+    <h3>Recovery Codes</h3>
+
+    <ul>
+        @foreach($user->recoveryCodes() as $code)
+            <li>{{ $code }}</li>
+        @endforeach
+    </ul>
+
     <form action="{{ route('two-factor.disable') }}" method="post">
         @csrf
-        @method('delete')
+        @method('DELETE')
         <button class="btn btn-primary">Disable 2FA</button>
     </form>
 
@@ -20,15 +28,21 @@
         <div class="mb-4 font-medium text-sm">
             Please finish configuring two factor authentication below.
         </div>
-    @endif
 
     {!! $user->twoFactorQrCodeSvg() !!}
 
-    <form action="{{ route('two-factor.disable') }}" method="post" class="form my-5">
+    <form action="{{ route('two-factor.confirm') }}" method="post" class="form my-5">
         @csrf
-        @method('DELETED')
-        <button class="btn btn-primary">Disable 2FA</button>
+        <p>Enter to Confirm Enable 2FA</p>
+        <input type="text" name="code" class="form-control">
+        <button class="btn btn-primary">Confirm</button>
     </form>
+    @else
+        <form action="{{ route('two-factor.enable') }}" method="post">
+            @csrf
+            <button class="btn btn-primary">Enable 2FA</button>
+        </form>
+    @endif
 
 @endif
 </body>
